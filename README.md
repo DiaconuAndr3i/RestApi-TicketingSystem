@@ -14,3 +14,6 @@ The api captures a system of creating tickets in which the user is provided with
 <li>Microsoft.EntityFrameworkCore.SqlServer</li>
 <li>Microsoft.EntityFrameworkCore.Tools</li>
 </ul>
+
+<h2>Database diagram</h2>
+<img src ="/Photos/diagram.png" alt="diagram database"/>

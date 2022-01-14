@@ -17,3 +17,6 @@ The api captures a system of creating tickets in which the user is provided with
 
 <h2>Database diagram</h2>
 <img src ="/Photos/diagram.png" alt="diagram database"/>
+
+<h2>The API works according to a pattern built on three levels</h2>
+<img src="patternApi.png" alt="patternApi"/>

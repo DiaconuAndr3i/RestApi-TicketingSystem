@@ -1,0 +1,8 @@
+{
+  "runtimeOptions": {
+    "additionalProbingPaths": [
+      "C:\\Users\\diaco\\.dotnet\\store\\|arch|\\|tfm|",
+      "C:\\Users\\diaco\\.nuget\\packages"
+    ]
+  }
+}

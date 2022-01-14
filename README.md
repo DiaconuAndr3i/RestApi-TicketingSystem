@@ -20,3 +20,9 @@ The api captures a system of creating tickets in which the user is provided with
 
 <h2>The API works according to a pattern built on three levels</h2>
 <img src="/Photos/patternApi.png" alt="patternApi"/>
+
+
+<h2>Some pictures from the swagger</h2>
+<img src ="/Photos/DeniedToRegisterAsAdmin.png" alt="diagram database"/>
+<img src ="/Photos/LoginResponse.png" alt="diagram database"/>
+<img src ="/Photos/GetAllGests.png" alt="diagram database"/>

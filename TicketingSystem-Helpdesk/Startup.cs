@@ -30,10 +30,18 @@ namespace TicketingSystem_Helpdesk
 
         public IConfiguration Configuration { get; }
 
+
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-
+            services.AddCors(options =>
+            {
+                options.AddPolicy(name: "_allowSpecificOrigins",
+                                  builder =>
+                                  {
+                                      builder.WithOrigins("localhost:4200", "http://localhost:4200").AllowAnyMethod().AllowAnyHeader();
+                                  });
+            });
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
@@ -127,6 +135,7 @@ namespace TicketingSystem_Helpdesk
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "TicketingSystem_Helpdesk v1"));
             }
 
+            app.UseCors("_allowSpecificOrigins");
             app.UseHttpsRedirection();
 
             app.UseRouting();

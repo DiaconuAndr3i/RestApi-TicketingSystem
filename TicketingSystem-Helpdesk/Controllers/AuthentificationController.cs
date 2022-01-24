@@ -34,9 +34,9 @@ namespace TicketingSystem_Helpdesk.Controllers
 
             if (servicesManager.ValidationRegistration(status))
             {
-                return Ok(status);
+                return Ok();
             }
-            return BadRequest(status);
+            return BadRequest();
         }
 
         [HttpPost("login")]

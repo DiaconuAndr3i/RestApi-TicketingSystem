@@ -58,7 +58,7 @@ namespace TicketingSystem_Helpdesk.Controllers
             [FromBody] HandleUserRoleModel handleUserRoleModel)
         {
             if (await myUserManager.AssignmentOfRequiredRole(handleUserRoleModel))
-                return Ok("User account roles changed.");
+                return Ok();
 
             return BadRequest("Something went wrong.");
         }
@@ -81,12 +81,12 @@ namespace TicketingSystem_Helpdesk.Controllers
             return BadRequest("Something went wrong.");
         }
 
-        [HttpDelete("/deleteUserAccount")]
+        [HttpDelete("/{deleteUserAccount}")]
         [Authorize(Policy = "Admin")]
-        public async Task<IActionResult> DeleteUserAccount([FromBody] DeleteAccountModel deleteAccountModel)
+        public async Task<IActionResult> DeleteUserAccount([FromRoute] string deleteUserAccount)
         {
-            if (await myUserManager.DeleteUserAccount(deleteAccountModel.Email))
-                return Ok("Account deleted.");
+            if (await myUserManager.DeleteUserAccount(deleteUserAccount))
+                return Ok();
             return BadRequest("The account with the specified email address doesn't exist.");
         }
 

@@ -18,7 +18,7 @@ namespace TicketingSystem_Helpdesk.Managers
         Task<UserRole> ConstructUserRole(HandleUserRoleModel handleUserRoleModel);
         Task<bool> DeleteRoleByInstitution(HandleUserRoleModel handleUserRoleModel);
         Task<bool> AssignmentOfRequiredRole(HandleUserRoleModel handleUserRoleModel);
-        Task<List<object>> GetGuestInformations(string institutionName);
+        Task<List<GuestInformationsModel>> GetGuestInformations(string institutionName);
         //For admins to view guest informations
         Task<bool> DeleteUserAccount(string emailUser);
         Task<List<UserInformationsModel>> GetUserInformationsByInstitDeptSubdept(string institutionName,

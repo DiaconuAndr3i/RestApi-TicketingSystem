@@ -180,10 +180,10 @@ namespace TicketingSystem_Helpdesk.Managers
             return true;
         }
 
-        public async Task<List<object>> GetGuestInformations(string institutionName)
+        public async Task<List<GuestInformationsModel>> GetGuestInformations(string institutionName)
         {
             List<UserInformationsModel> listUserInformation = await GetUserInformations(institutionName);
-            var filteredListUserInformation = new List<object>();
+            var filteredListUserInformation = new List<GuestInformationsModel>();
             var defaulRole = configuration.GetSection("Roles").GetSection("DefaultRole").Get<string>();
 
 
@@ -191,9 +191,12 @@ namespace TicketingSystem_Helpdesk.Managers
             {
                 if (item.Roles.Contains(defaulRole))
                 {
-                    var roles = await guestManager.GetGuestRoles(item.IdUser);
-                    var pair = new { item, RequiredRoles = roles };
-                    filteredListUserInformation.Add(pair);
+                    var guestInformationsModel = new GuestInformationsModel
+                    {
+                        UserInformationsModel = item,
+                        RequiredRoles = await guestManager.GetGuestRoles(item.IdUser)
+                    };
+                    filteredListUserInformation.Add(guestInformationsModel);
                 }
             }
 

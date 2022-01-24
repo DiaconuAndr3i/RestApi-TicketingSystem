@@ -40,11 +40,11 @@ namespace TicketingSystem_Helpdesk.Entities
                 .WithOne(u => u.Guest);
 
             builder.Entity<Status>()
-                .HasOne(s => s.Ticket)
+                .HasMany(s => s.Tickets)
                 .WithOne(t => t.Status);
 
             builder.Entity<Priority>()
-                .HasOne(p => p.Ticket)
+                .HasMany(p => p.Tickets)
                 .WithOne(t => t.Priority);
 
             builder.Entity<User>()

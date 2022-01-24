@@ -9,6 +9,6 @@ namespace TicketingSystem_Helpdesk.Entities
     {
         public string Id { get; set; }
         public string Name { get; set; }
-        public virtual Ticket Ticket { get; set; }
+        public ICollection<Ticket> Tickets { get; set; }
     }
 }

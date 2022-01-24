@@ -26,7 +26,7 @@ namespace TicketingSystem_Helpdesk.Controllers
         public async Task<IActionResult> CreateTicket([FromBody] CreateTicketModel createTicketModel)
         {
             if (await ticketManager.CreateTicket(createTicketModel))
-                return Ok("Ticket created.");
+                return Ok();
 
             return BadRequest("Something went wrong.");
 

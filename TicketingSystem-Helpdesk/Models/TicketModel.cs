@@ -11,6 +11,7 @@ namespace TicketingSystem_Helpdesk.Models
         public DateTime CreatedDate { get; set; }
         public string ArrivalEmail { get; set; }
         public string TicketCreatorEmail { get; set; }
+        public bool NewActivity { get; set; }
         public string Priority { get; set; }
         public string Status { get; set; }
         public List<string> Tag { get; set; }

@@ -78,5 +78,13 @@ namespace TicketingSystem_Helpdesk.Controllers
                 return Ok("Status changed.");
             return BadRequest("Something went wrong.");
         }
+
+        [HttpPut("/changeActivityTicket/{idTicket}/{activity}")]
+        public async Task<IActionResult> ChangeStatusTicket([FromRoute] string idTicket, bool activity)
+        {
+            if (await ticketManager.ChangeNewActivityTicket(idTicket, activity))
+                return Ok("Activity changed.");
+            return BadRequest("Something went wrong.");
+        }
     }
 }

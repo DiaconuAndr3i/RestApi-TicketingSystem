@@ -49,6 +49,7 @@ namespace TicketingSystem_Helpdesk.Managers
                 CreatedDate = servicesManager.GenerateCurrentDate(),
                 Arrival = arrival.Id,
                 UserId = creator.Id,
+                NewActivity = createTicketModel.TicketModel.NewActivity,
                 PriorityId = await priorityManager.GetPriorityIdByName(createTicketModel.TicketModel.Priority),
                 StatusId = await statusManager.GetStatusIdByName(createTicketModel.TicketModel.Status)
             };
@@ -127,15 +128,9 @@ namespace TicketingSystem_Helpdesk.Managers
             var user= await userManager.FindByEmailAsync(email);
 
             var tickets = await ticketRepository.GetAllTickets()
-                .Where(x => x.UserId.Equals(user.Id))
+                .Where(x => direction == true ? x.UserId.Equals(user.Id): x.Arrival.Equals(user.Id))
+                .OrderByDescending(x => x.NewActivity == true ? 1 : 0)
                 .ToListAsync();
-
-            if (!direction)
-            {
-                 tickets = await ticketRepository.GetAllTickets()
-                .Where(x => x.Arrival.Equals(user.Id))
-                .ToListAsync();
-            }
 
             var list = new List<ReceiveTicketModel>();
             foreach (var item in tickets)
@@ -151,6 +146,7 @@ namespace TicketingSystem_Helpdesk.Managers
                         CreatedDate = item.CreatedDate,
                         ArrivalEmail = userArrivalEmail.Email,
                         TicketCreatorEmail = userCreatorEmail.Email,
+                        NewActivity = item.NewActivity,
                         Priority = await priorityManager.GetPriorityNameById(item.PriorityId),
                         Status = await statusManager.GetStatusNameById(item.StatusId),
                         Tag = await tagManager.GetTagsNameTicket(item.Id)
@@ -200,6 +196,19 @@ namespace TicketingSystem_Helpdesk.Managers
 
             return true;
 
+        }
+
+        public async Task<bool> ChangeNewActivityTicket(string idTicket, bool activity)
+        {
+            var ticket = await GetTicketById(idTicket);
+            if (ticket == null)
+                return false;
+
+            ticket.NewActivity = activity;
+
+            await ticketRepository.SaveChanges();
+
+            return true;
         }
     }
 }

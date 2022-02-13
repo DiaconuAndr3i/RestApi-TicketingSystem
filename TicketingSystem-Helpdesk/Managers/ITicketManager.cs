@@ -17,5 +17,6 @@ namespace TicketingSystem_Helpdesk.Managers
         Task<Ticket> GetTicketById(string idTicket);
         Task<bool> DeleteTicket(string idTicket);
         Task<bool> ChangeStatusTicket(string idTicket, string status);
+        Task<bool> ChangeNewActivityTicket(string idTicket, bool activity);
     }
 }

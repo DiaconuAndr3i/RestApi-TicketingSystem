@@ -11,6 +11,7 @@ namespace TicketingSystem_Helpdesk.Entities
         public string Title { get; set; }
         public DateTime CreatedDate { get; set; }
         public string Arrival { get; set; }
+        public bool NewActivity { get; set; }
         public string UserId { get; set; }
         public string PriorityId { get; set; }
         public string StatusId { get; set; }

@@ -76,5 +76,12 @@ namespace TicketingSystem_Helpdesk.Repositories
 
             await context.SaveChangesAsync();
         }
+
+        public void UpdateUser(User user)
+        {
+            context.Update(user);
+
+            context.SaveChanges();
+        }
     }
 }

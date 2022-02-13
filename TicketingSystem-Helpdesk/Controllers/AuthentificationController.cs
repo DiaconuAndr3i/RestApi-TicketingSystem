@@ -62,6 +62,16 @@ namespace TicketingSystem_Helpdesk.Controllers
             }
         }
 
+        [HttpPost("refresh-token")]
+        public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenModel refreshTokenModel)
+        {
+            var response = await authentificationManager.RefreshToken(refreshTokenModel);
+
+            if (response == null)
+                return Unauthorized(new { message = "Invalid token" });
+
+            return Ok(response);
+        }
 
     }
 }

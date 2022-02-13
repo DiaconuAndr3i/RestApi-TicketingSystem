@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TicketingSystem_Helpdesk.Entities;
 
 namespace TicketingSystem_Helpdesk.Migrations
 {
     [DbContext(typeof(Context))]
-    partial class ContextModelSnapshot : ModelSnapshot
+    [Migration("20220210161726_AddListRefreshToken")]
+    partial class AddListRefreshToken
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -619,8 +621,20 @@ namespace TicketingSystem_Helpdesk.Migrations
                             b1.Property<DateTime>("Created")
                                 .HasColumnType("datetime2");
 
+                            b1.Property<string>("CreatedByIp")
+                                .HasColumnType("nvarchar(max)");
+
                             b1.Property<DateTime>("Expires")
                                 .HasColumnType("datetime2");
+
+                            b1.Property<string>("ReplacedByToken")
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.Property<DateTime?>("Revoked")
+                                .HasColumnType("datetime2");
+
+                            b1.Property<string>("RevokedByIp")
+                                .HasColumnType("nvarchar(max)");
 
                             b1.Property<string>("Token")
                                 .HasColumnType("nvarchar(max)");

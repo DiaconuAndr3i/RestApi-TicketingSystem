@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using TicketingSystem_Helpdesk.Entities;
 using TicketingSystem_Helpdesk.Models;
+using TicketingSystem_Helpdesk.Repositories;
 
 namespace TicketingSystem_Helpdesk.Managers
 {
@@ -20,6 +21,7 @@ namespace TicketingSystem_Helpdesk.Managers
         private readonly IGuestManager guestManager;
         private readonly IInstitutionManager institutionManager;
         private readonly IRoleManager roleManager;
+        private readonly IMyUserRepository myUserRepository;
 
 
         public AuthentificationManager(UserManager<User> userManager, 
@@ -27,7 +29,8 @@ namespace TicketingSystem_Helpdesk.Managers
             IMyUserManager myUserManager, IConfiguration configuration,
             IServicesManager servicesManager, IGuestManager guestManager,
             IInstitutionManager institutionManager,
-            IRoleManager roleManager)
+            IRoleManager roleManager,
+            IMyUserRepository myUserRepository)
         {
             this.userManager = userManager;
             this.signInManager = signInManager;
@@ -38,6 +41,7 @@ namespace TicketingSystem_Helpdesk.Managers
             this.guestManager = guestManager;
             this.institutionManager = institutionManager;
             this.roleManager = roleManager;
+            this.myUserRepository = myUserRepository;
         }
         public async Task<LoginResponseModel> Login(LoginModel loginModel)
         {
@@ -53,13 +57,20 @@ namespace TicketingSystem_Helpdesk.Managers
                         return null;
                     }
 
-                    var token = tokenManager.GenerateToken(roles);
+                    var accessToken = tokenManager.GenerateAccessToken(roles);
+                    var refreshToken = tokenManager.GenerateRefreshToken();
+
+                    user.RefreshTokens.Add(refreshToken);
+
+                    myUserRepository.UpdateUser(user);
+
 
                     return new LoginResponseModel
                     {
                         FirstName = user.First_name,
                         Lastname = user.Last_name,
-                        AccessToken = token,
+                        AccessToken = accessToken,
+                        RefreshToken = refreshToken.Token,
                         Roles = roles,
                         Institution = loginModel.Institution
                     };
@@ -116,6 +127,31 @@ namespace TicketingSystem_Helpdesk.Managers
             }
 
             return configuration.GetSection("RegisterStatus").GetSection("StatusProblem").Get<string>();
+        }
+
+        public async Task<AccessTokenModel> RefreshToken(RefreshTokenModel refreshTokenModel)
+        {
+            var user = myUserRepository.GetAllUsers().SingleOrDefault(u => u.RefreshTokens.Any(t => t.Token == refreshTokenModel.RefreshToken));
+
+            if (user == null)            
+                return null;
+
+            var refreshToken = user.RefreshTokens.Single(x => x.Token == refreshTokenModel.RefreshToken);
+
+            if (!refreshToken.IsActive) 
+                return null;
+
+            var roles = await myUserManager.GetUserRolesByInstitution(user, refreshTokenModel.Institution);
+            
+            if (!servicesManager.ValidationCountZero(roles))
+                return null; 
+
+            var accessToken = tokenManager.GenerateAccessToken(roles);
+
+            return new AccessTokenModel
+            {
+                AccessToken = accessToken
+            };
         }
     }
 }

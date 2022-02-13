@@ -13,5 +13,6 @@ namespace TicketingSystem_Helpdesk.Entities
         public ICollection<UserRole> UserRoles { get; set; }
         public ICollection<Ticket> Tickets { get; set; }
         public virtual Guest Guest { get; set; }
+        public List<RefreshToken> RefreshTokens { get; set; }
     }
 }

@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TicketingSystem_Helpdesk.Entities;
 
 namespace TicketingSystem_Helpdesk.Migrations
 {
     [DbContext(typeof(Context))]
-    partial class ContextModelSnapshot : ModelSnapshot
+    [Migration("20220210161116_AddRefreshTokenOnUser")]
+    partial class AddRefreshTokenOnUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -606,28 +608,35 @@ namespace TicketingSystem_Helpdesk.Migrations
 
             modelBuilder.Entity("TicketingSystem_Helpdesk.Entities.User", b =>
                 {
-                    b.OwnsMany("TicketingSystem_Helpdesk.Entities.RefreshToken", "RefreshTokens", b1 =>
+                    b.OwnsOne("TicketingSystem_Helpdesk.Entities.RefreshToken", "RefreshTokens", b1 =>
                         {
                             b1.Property<string>("UserId")
                                 .HasColumnType("nvarchar(450)");
 
-                            b1.Property<int>("Id")
-                                .ValueGeneratedOnAdd()
-                                .HasColumnType("int")
-                                .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
                             b1.Property<DateTime>("Created")
                                 .HasColumnType("datetime2");
+
+                            b1.Property<string>("CreatedByIp")
+                                .HasColumnType("nvarchar(max)");
 
                             b1.Property<DateTime>("Expires")
                                 .HasColumnType("datetime2");
 
+                            b1.Property<string>("ReplacedByToken")
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.Property<DateTime?>("Revoked")
+                                .HasColumnType("datetime2");
+
+                            b1.Property<string>("RevokedByIp")
+                                .HasColumnType("nvarchar(max)");
+
                             b1.Property<string>("Token")
                                 .HasColumnType("nvarchar(max)");
 
-                            b1.HasKey("UserId", "Id");
+                            b1.HasKey("UserId");
 
-                            b1.ToTable("RefreshToken");
+                            b1.ToTable("AspNetUsers");
 
                             b1.WithOwner()
                                 .HasForeignKey("UserId");

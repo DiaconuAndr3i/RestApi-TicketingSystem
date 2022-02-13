@@ -8,6 +8,7 @@ namespace TicketingSystem_Helpdesk.Managers
 {
     public interface ITokenManager
     {
-        string GenerateToken(List<string> roles);
+        string GenerateAccessToken(List<string> roles);
+        RefreshToken GenerateRefreshToken();
     }
 }

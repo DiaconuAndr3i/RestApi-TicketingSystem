@@ -16,5 +16,6 @@ namespace TicketingSystem_Helpdesk.Repositories
         Task AddUserRoleAsync(UserRole userRole);
         Task DeleteUserRoleAsync(UserRole userRole);
         Task DeleteUserAccount(User user);
+        void UpdateUser(User user);
     }
 }

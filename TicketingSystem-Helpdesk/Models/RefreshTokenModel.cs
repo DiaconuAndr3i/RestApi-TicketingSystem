@@ -5,13 +5,9 @@ using System.Threading.Tasks;
 
 namespace TicketingSystem_Helpdesk.Models
 {
-    public class LoginResponseModel
+    public class RefreshTokenModel
     {
-        public string FirstName { get; set; }
-        public string Lastname { get; set; }
-        public string AccessToken { get; set; }
         public string RefreshToken { get; set; }
         public string Institution { get; set; }
-        public List<string> Roles { get; set; }
     }
 }

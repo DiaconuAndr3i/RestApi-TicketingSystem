@@ -39,7 +39,7 @@ namespace TicketingSystem_Helpdesk.Managers
             var tokenDescription = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.UtcNow.AddMinutes(5),
+                Expires = DateTime.UtcNow.AddHours(5),
                 SigningCredentials = signatureCreds
             };
 

@@ -26,6 +26,7 @@ namespace TicketingSystem_Helpdesk
             services.AddTransient<ITagManager, TagManager>();
             services.AddTransient<IDepartmentsSubdepartmentsManager, DepartmentsSubdepartmentsManager>();
             services.AddTransient<IInstitutionDepartmentManager, InstitutionDepartmentManager>();
+            services.AddTransient<IStatisticsManager, StatisticsManager>();
 
 
             services.AddTransient<IMyUserRepository, MyUserRepository>();

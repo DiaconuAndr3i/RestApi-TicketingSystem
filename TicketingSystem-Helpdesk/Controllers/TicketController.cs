@@ -62,11 +62,11 @@ namespace TicketingSystem_Helpdesk.Controllers
             return Ok(tickets);
         }
 
-        [HttpDelete("/deleteTicketById")]
-        public async Task<IActionResult> DeleteTicketById([FromBody] string idTicket)
+        [HttpDelete("/deleteTicketById/{idTicket}")]
+        public async Task<IActionResult> DeleteTicketById([FromRoute] string idTicket)
         {
             if (await ticketManager.DeleteTicket(idTicket))
-                return Ok("Ticket deleted.");
+                return Ok();
 
             return BadRequest("The ticket with the specified id doesn't exist.");
         }
@@ -80,10 +80,10 @@ namespace TicketingSystem_Helpdesk.Controllers
         }
 
         [HttpPut("/changeActivityTicket/{idTicket}/{activity}")]
-        public async Task<IActionResult> ChangeStatusTicket([FromRoute] string idTicket, bool activity)
+        public async Task<IActionResult> ChangeActivityTicket([FromRoute] string idTicket, bool activity)
         {
             if (await ticketManager.ChangeNewActivityTicket(idTicket, activity))
-                return Ok("Activity changed.");
+                return Ok();
             return BadRequest("Something went wrong.");
         }
     }

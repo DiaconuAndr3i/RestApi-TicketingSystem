@@ -11,7 +11,6 @@ namespace TicketingSystem_Helpdesk.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Policy = "Admin")]
     public class RolesController : ControllerBase
     {
         private readonly IRoleManager roleManager;
@@ -30,6 +29,7 @@ namespace TicketingSystem_Helpdesk.Controllers
         }
 
         [HttpPost("/createNewRole/{roleName}")]
+        [Authorize(Policy = "Admin")]
         public async Task<IActionResult> CreateNewRole([FromRoute] string roleName)
         {
             await roleManager.CreateNewRole(roleName);
@@ -38,6 +38,7 @@ namespace TicketingSystem_Helpdesk.Controllers
         }
 
         [HttpPut("/updateRole/{idRole}/{nameRole}")]
+        [Authorize(Policy = "Admin")]
         public async Task<IActionResult> UpdateRole([FromRoute] string idRole, string nameRole)
         {
             if (await roleManager.UpdateRole(idRole, nameRole))
@@ -46,6 +47,7 @@ namespace TicketingSystem_Helpdesk.Controllers
         }
 
         [HttpDelete("/deleteRole")]
+        [Authorize(Policy = "Admin")]
         public async Task<IActionResult> DeleteRole([FromBody] string idRole)
         {
             if (await roleManager.DelteRole(idRole))

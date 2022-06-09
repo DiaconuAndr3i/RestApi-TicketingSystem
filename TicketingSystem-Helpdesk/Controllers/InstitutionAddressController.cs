@@ -22,7 +22,7 @@ namespace TicketingSystem_Helpdesk.Controllers
         }
 
         [HttpGet("/getAllInstitutions")]
-        [Authorize(Policy = "AllRoles")]
+        //[Authorize(Policy = "AllRoles")]
         public async Task<IActionResult> GetAllInstituions()
         {
             var instituions = await institutionManager.GetAllIdNameInstitutions();

@@ -27,7 +27,7 @@ namespace TicketingSystem_Helpdesk.Controllers
         {
             await messageManager.AddMessage(messageModel);
 
-            return Ok("Message added.");
+            return Ok();
         }
 
         [HttpGet("/getMessagesFromTicket/{idTicket}")]

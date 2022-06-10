@@ -51,12 +51,28 @@ namespace TicketingSystem_Helpdesk.Controllers
             return Ok(percentageGuests);
         }
 
+        [HttpGet("/numberOfTicketsOpenClosed")]
+        public async Task<IActionResult> NumberOfTicketsOpenClosed()
+        {
+            var numberOfTicketsOpenClosed = await statisticsManager.NumberOfTicketsOpenClosed();
+
+            return Ok(numberOfTicketsOpenClosed);
+        }
+
         [HttpGet("/percentageDepartment/{institution}")]
         public async Task<IActionResult> PercentageDepartment([FromRoute] string institution)
         {
             var modelPercentage = await statisticsManager.MostLabeledDepartment(institution);
 
             return Ok(modelPercentage);
+        }
+
+        [HttpGet("/peoplePerDepartment/{institution}")]
+        public async Task<IActionResult> PeoplePerDepartment([FromRoute] string institution)
+        {
+            var departments = await statisticsManager.PeoplePerDepartment(institution);
+
+            return Ok(departments);
         }
     }
 }

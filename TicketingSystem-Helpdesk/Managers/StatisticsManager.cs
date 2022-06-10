@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using TicketingSystem_Helpdesk.Entities;
 using TicketingSystem_Helpdesk.Models;
@@ -20,6 +21,7 @@ namespace TicketingSystem_Helpdesk.Managers
         private readonly UserManager<User> userManager;
         private readonly IInstitutionManager institutionManager;
         private readonly IServicesManager servicesManager;
+        private readonly IMyUserManager myUserManager;
 
         public StatisticsManager(IMyUserRepository myUserRepository,
             ITicketRepository ticketRepository,
@@ -28,7 +30,8 @@ namespace TicketingSystem_Helpdesk.Managers
             IDepartmentsSubdepartmentsRepository departmentsSubdepartmentsRepository,
             UserManager<User> userManager,
             IInstitutionManager institutionManager,
-            IServicesManager servicesManager)
+            IServicesManager servicesManager,
+            IMyUserManager myUserManager)
         {
             this.myUserRepository = myUserRepository;
             this.ticketRepository = ticketRepository;
@@ -38,15 +41,16 @@ namespace TicketingSystem_Helpdesk.Managers
             this.userManager = userManager;
             this.institutionManager = institutionManager;
             this.servicesManager = servicesManager;
+            this.myUserManager = myUserManager;
         }
 
         public async Task<decimal> GuestPercentage()
         {
-            var guests = await guestRepository.GetAllGuests().ToListAsync();
+            var numberOfGuests = await NumberOfGuests();
             var numberOfUsers = await NumberOfUsers();
 
-            var percentage = Decimal.Round(Decimal.Divide(guests.Count * 100, numberOfUsers),2);
-
+            var percentage = Decimal.Round(Decimal.Divide(numberOfGuests * 100, numberOfUsers), 2);
+         
 
             return percentage;
         }
@@ -63,6 +67,20 @@ namespace TicketingSystem_Helpdesk.Managers
             var tickets = await ticketRepository.GetAllTickets().ToListAsync();
 
             return tickets.Count;
+        }
+
+        public async Task<object> NumberOfTicketsOpenClosed()
+        {
+            var ticketsTotal = await ticketRepository.GetAllTickets().ToListAsync();
+            var ticketsOpen = await ticketRepository.GetAllTickets()
+                .Where(x => x.StatusId.Equals("Open"))
+                .ToListAsync();
+
+            return new { 
+                Open = ticketsOpen.Count, 
+                Closed = ticketsTotal.Count - ticketsOpen.Count 
+            };
+
         }
 
         public async Task<int> NumberOfUsers()
@@ -127,6 +145,42 @@ namespace TicketingSystem_Helpdesk.Managers
             };
 
             return mostLabeledDepartmentModel;
+        }
+
+        public async Task<int> NumberOfGuests()
+        {
+            var guests = await guestRepository.GetAllGuests().ToListAsync();
+
+            return guests.Count;
+        }
+
+        public async Task<IDictionary<string, int>> PeoplePerDepartment(String institution)
+        {
+            IDictionary<string, int> departmentsNumberOfUsers = new Dictionary<string, int>();
+
+            var departments = await departmentsSubdepartmentsRepository
+                .GetAllDepartments().ToListAsync();
+
+            foreach(var department in departments)
+            {
+                departmentsNumberOfUsers.Add(department.Name, 0);
+            }
+
+            var users = await myUserManager.GetUserInformations(institution);
+
+            foreach(var user in users)
+            {
+                var userForCall = await userManager.FindByIdAsync(user.IdUser);
+                var roles = await myUserRepository.GetUserAllRoles(userForCall).ToListAsync();
+                foreach(var role in roles)
+                {
+                    var roleItem = Regex.Replace(role.Name.Split()[0], @"[^0-9a-zA-Z\ ]+", "");
+                    departmentsNumberOfUsers[roleItem] += 1;
+                }
+            }
+
+            return departmentsNumberOfUsers;
+
         }
     }
 }

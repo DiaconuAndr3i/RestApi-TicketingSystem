@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -17,6 +18,7 @@ using System.Text;
 using System.Threading.Tasks;
 using TicketingSystem_Helpdesk.Entities;
 using TicketingSystem_Helpdesk.Managers;
+using TicketingSystem_Helpdesk.Models;
 using TicketingSystem_Helpdesk.Repositories;
 
 namespace TicketingSystem_Helpdesk
@@ -76,6 +78,22 @@ namespace TicketingSystem_Helpdesk
                 });
             });
 
+            IdentityBuilder builder = services.AddIdentityCore<User>(options =>
+            {
+                options.Password.RequireDigit = true;
+                options.Password.RequireLowercase = true;
+                options.Password.RequireNonAlphanumeric = true;
+                options.Password.RequireUppercase = true;
+                options.Password.RequiredLength = 4;
+
+                options.User.RequireUniqueEmail = true;
+            });
+            builder = new IdentityBuilder(builder.UserType, typeof(IdentityRole), builder.Services);
+            builder.AddEntityFrameworkStores<Context>();
+            builder.AddSignInManager<SignInManager<User>>();
+            builder.AddRoleManager<RoleManager<IdentityRole>>();
+            builder.AddDefaultTokenProviders();
+
             services.AddDbContext<Context>(options => options
             .UseLoggerFactory(LoggerFactory.Create(builder => builder.AddConsole()))
             .UseSqlServer(Configuration.GetSection("ConnectionStrings").GetSection("Defaultconnection").Get<string>())
@@ -121,7 +139,8 @@ namespace TicketingSystem_Helpdesk
                 .SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
 
             services = TransitentServices.AddTransitentServices(services);
-
+            services.AddSingleton<IEmailManager, MailJet>();
+            services.Configure<EmailOptionsModel>(Configuration.GetSection("MailJet"));
 
         }
 

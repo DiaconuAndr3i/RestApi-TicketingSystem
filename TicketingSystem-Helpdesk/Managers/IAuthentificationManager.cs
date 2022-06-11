@@ -11,5 +11,7 @@ namespace TicketingSystem_Helpdesk.Managers
         Task<string> Register(RegisterModel registerModel);
         Task<LoginResponseModel> Login(LoginModel loginModel);
         Task<AccessTokenModel> RefreshToken(RefreshTokenModel refreshTokenModel);
+        Task<Boolean> ResetPassword(ResetPasswordModel model, string changePassword);
+        Task<Boolean> ChangePassword(ChangePasswordModel model);
     }
 }

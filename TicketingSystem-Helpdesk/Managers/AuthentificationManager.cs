@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Web;
 using TicketingSystem_Helpdesk.Entities;
 using TicketingSystem_Helpdesk.Models;
 using TicketingSystem_Helpdesk.Repositories;
@@ -22,6 +24,8 @@ namespace TicketingSystem_Helpdesk.Managers
         private readonly IInstitutionManager institutionManager;
         private readonly IRoleManager roleManager;
         private readonly IMyUserRepository myUserRepository;
+        private readonly IOptions<EmailOptionsModel> emailOptions;
+        private readonly IEmailManager email;
 
 
         public AuthentificationManager(UserManager<User> userManager, 
@@ -30,7 +34,9 @@ namespace TicketingSystem_Helpdesk.Managers
             IServicesManager servicesManager, IGuestManager guestManager,
             IInstitutionManager institutionManager,
             IRoleManager roleManager,
-            IMyUserRepository myUserRepository)
+            IMyUserRepository myUserRepository,
+            IOptions<EmailOptionsModel> emailOptions,
+            IEmailManager email)
         {
             this.userManager = userManager;
             this.signInManager = signInManager;
@@ -42,6 +48,8 @@ namespace TicketingSystem_Helpdesk.Managers
             this.institutionManager = institutionManager;
             this.roleManager = roleManager;
             this.myUserRepository = myUserRepository;
+            this.emailOptions = emailOptions;
+            this.email = email;
         }
         public async Task<LoginResponseModel> Login(LoginModel loginModel)
         {
@@ -152,6 +160,43 @@ namespace TicketingSystem_Helpdesk.Managers
             {
                 AccessToken = accessToken
             };
+        }
+
+        public async Task<bool> ResetPassword(ResetPasswordModel model, string changePassword)
+        {
+            var user = await userManager.FindByEmailAsync(model.Email);
+            if (user != null)
+            {
+                var token = await userManager.GeneratePasswordResetTokenAsync(user);
+
+                var uriBuilder = new UriBuilder(changePassword);
+                var query = HttpUtility.ParseQueryString(uriBuilder.Query);
+
+                query["token"] = token;
+                query["userid"] = user.Id;
+
+                uriBuilder.Query = query.ToString();
+                var urlString = uriBuilder.ToString();
+
+                var emailBody = $"Click on link below to change password </br>{urlString}";
+                var subject = "Reset Password";
+                await email.Send(model.Email, emailBody, subject, emailOptions.Value);
+
+                return true;
+            }
+            return false;
+        }
+
+        public async Task<bool> ChangePassword(ChangePasswordModel model)
+        {
+            var user = await userManager.FindByIdAsync(model.UserId);
+            var change = await userManager.ResetPasswordAsync(user, Uri.UnescapeDataString(model.Token), model.Password);
+
+            if (change.Succeeded)
+            {
+                return true;
+            }
+            return false;
         }
     }
 }

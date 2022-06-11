@@ -73,5 +73,26 @@ namespace TicketingSystem_Helpdesk.Controllers
             return Ok(response);
         }
 
+        [HttpPost("resetPassword")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordModel resetPasswordModel)
+        {
+            var changePassword = Request.Headers["changePassword"];
+            if (await authentificationManager.ResetPassword(resetPasswordModel, changePassword))
+            {
+                return Ok();
+            }
+            return BadRequest();
+        }
+
+        [HttpPost("changePassword")]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordModel changePasswordModel)
+        {
+            if (await authentificationManager.ChangePassword(changePasswordModel))
+            {
+                return Ok();
+            }
+            return BadRequest();
+        }
+
     }
 }

@@ -85,7 +85,7 @@ namespace TicketingSystem_Helpdesk.Managers
                 }
             }
 
-            return null;
+            return new LoginResponseModel { };
         }
 
         public async Task<string> Register(RegisterModel registerModel)

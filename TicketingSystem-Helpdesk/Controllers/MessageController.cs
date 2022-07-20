@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Confluent.Kafka;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,7 +24,7 @@ namespace TicketingSystem_Helpdesk.Controllers
             this.messageManager = messageManager;
         }
 
-        [HttpPost("/createMessage")]
+    [HttpPost("/createMessage")]
         public async Task<IActionResult> CreateMessage([FromBody] MessageModel messageModel)
         {
             await messageManager.AddMessage(messageModel);

@@ -23,5 +23,6 @@ namespace TicketingSystem_Helpdesk.Managers
         Task<bool> DeleteUserAccount(string emailUser);
         Task<List<UserInformationsModel>> GetUserInformationsByInstitDeptSubdept(string institutionName,
             string departmentName, string subdepartmentName);
+        Task<Boolean> ProduceMessageForKafkaBroker();
     }
 }

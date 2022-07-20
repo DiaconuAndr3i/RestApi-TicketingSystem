@@ -131,11 +131,14 @@ namespace TicketingSystem_Helpdesk.Managers
 
                 await guestManager.RegisterGuest(user, registerModel.RoleName);
 
+                await myUserManager.ProduceMessageForKafkaBroker();
+
                 return configuration.GetSection("RegisterStatus").GetSection("StatusOk").Get<string>();
             }
 
             return configuration.GetSection("RegisterStatus").GetSection("StatusProblem").Get<string>();
         }
+
 
         public async Task<AccessTokenModel> RefreshToken(RefreshTokenModel refreshTokenModel)
         {

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using TicketingSystem_Helpdesk.Entities;
 using TicketingSystem_Helpdesk.Models;
@@ -18,5 +17,6 @@ namespace TicketingSystem_Helpdesk.Managers
         Task<bool> DeleteTicket(string idTicket);
         Task<bool> ChangeStatusTicket(string idTicket, string status);
         Task<bool> ChangeNewActivityTicket(string idTicket, bool activity);
+        Task<Boolean> ProduceMessageForKafkaBroker(object obj, string topic);
     }
 }

@@ -1,3 +1,4 @@
+using Confluent.Kafka;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -44,6 +45,15 @@ namespace TicketingSystem_Helpdesk
                                       builder.WithOrigins("localhost:4200", "http://localhost:4200").AllowAnyMethod().AllowAnyHeader();
                                   });
             });
+
+
+            var producerConfig = new ProducerConfig();
+
+            Configuration.Bind("producer", producerConfig);
+
+            services.AddSingleton<ProducerConfig>(producerConfig);
+
+
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {

@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Confluent.Kafka;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,6 +22,8 @@ namespace TicketingSystem_Helpdesk.Managers
         private readonly IRoleManager roleManager;
         private readonly IConfiguration configuration;
         private readonly IServicesManager servicesManager;
+        private readonly IGuestRepository guestRepository;
+        private readonly ProducerConfig producerConfig;
 
         public MyUserManager(IMyUserRepository myUserRepository,
             UserManager<User> userManager,
@@ -27,7 +31,9 @@ namespace TicketingSystem_Helpdesk.Managers
             IGuestManager guestManager,
             IRoleManager roleManager, 
             IConfiguration configuration,
-            IServicesManager servicesManager)
+            IServicesManager servicesManager,
+            IGuestRepository guestRepository,
+            ProducerConfig producerConfig)
         {
             this.myUserRepository = myUserRepository;
             this.userManager = userManager;
@@ -36,6 +42,8 @@ namespace TicketingSystem_Helpdesk.Managers
             this.roleManager = roleManager;
             this.configuration = configuration;
             this.servicesManager = servicesManager;
+            this.guestRepository = guestRepository;
+            this.producerConfig = producerConfig;
         }
 
         public async Task<UserRole> ConstructUserRole(HandleUserRoleModel handleUserRoleModel)
@@ -177,7 +185,25 @@ namespace TicketingSystem_Helpdesk.Managers
 
             await guestManager.DeleteGuest(user.Id);
 
+            _ = await ProduceMessageForKafkaBroker();
+
             return true;
+        }
+
+        //Producer for kafka broker
+        public async Task<Boolean> ProduceMessageForKafkaBroker() {
+            var numberOfGuests = (await guestRepository.GetAllGuests().ToListAsync()).Count;
+            var numberOfUsers = (await myUserRepository.GetAllUsers().ToListAsync()).Count;
+            var percentageGuest = Decimal.Round(Decimal.Divide(numberOfGuests * 100, numberOfUsers), 2);
+
+            string serializedJson = JsonConvert.SerializeObject(percentageGuest);
+
+            using (var producerForKafkaBroker = new ProducerBuilder<Null, string>(producerConfig).Build()) 
+            {
+                await producerForKafkaBroker.ProduceAsync("userGuest", new Message<Null, string> { Value = serializedJson });
+                producerForKafkaBroker.Flush(TimeSpan.FromSeconds(20));
+                return true;
+            }
         }
 
         public async Task<List<GuestInformationsModel>> GetGuestInformations(string institutionName)
@@ -211,6 +237,9 @@ namespace TicketingSystem_Helpdesk.Managers
                 return false;
 
             await myUserRepository.DeleteUserAccount(user);
+
+            _ = await ProduceMessageForKafkaBroker();
+
             return true;
         }
     }

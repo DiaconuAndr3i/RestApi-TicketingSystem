@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Confluent.Kafka;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,14 +16,21 @@ namespace TicketingSystem_Helpdesk.Managers
     {
         private readonly IMessageRepository messageRepository;
         private readonly IServicesManager servicesManager;
+        private readonly ITicketRepository ticketRepository;
+        private readonly ProducerConfig producerConfig;
         private readonly UserManager<User> userManager;
+
 
         public MessageManager(IMessageRepository messageRepository,
             IServicesManager servicesManager,
+            ITicketRepository ticketRepository,
+            ProducerConfig producerConfig,
             UserManager<User> userManager)
         {
             this.messageRepository = messageRepository;
             this.servicesManager = servicesManager;
+            this.ticketRepository = ticketRepository;
+            this.producerConfig = producerConfig;
             this.userManager = userManager;
         }
 
@@ -37,6 +46,33 @@ namespace TicketingSystem_Helpdesk.Managers
             };
 
             await messageRepository.AddMessage(message);
+
+            var ticket = await ticketRepository.GetAllTickets()
+                .Where(x => x.Id.Equals(message.TicketId)).FirstOrDefaultAsync();
+
+            var emailA = await userManager.GetEmailAsync(await userManager.FindByIdAsync(ticket.UserId));
+            var emailB = await userManager.GetEmailAsync(await userManager.FindByIdAsync(ticket.Arrival));
+
+            var messageModelForKafka = new
+            {
+                CreatorEmail = messageModel.EmailCreator,
+                ArrivalEmail = emailA == messageModel.EmailCreator ? emailB : emailA
+            };
+
+            _ = await ProduceMessageForKafkaBroker(messageModelForKafka, "newMessage");
+
+        }
+
+        public async Task<Boolean> ProduceMessageForKafkaBroker(object obj, string topic)
+        {
+            string serializedJson = JsonConvert.SerializeObject(obj);
+
+            using (var producerForKafkaBroker = new ProducerBuilder<Null, string>(producerConfig).Build())
+            {
+                await producerForKafkaBroker.ProduceAsync(topic, new Message<Null, string> { Value = serializedJson });
+                producerForKafkaBroker.Flush(TimeSpan.FromSeconds(20));
+                return true;
+            }
         }
 
         public MessageModel CreateObjectMessageModel(CreateTicketModel createTicketModel, string idTicket)

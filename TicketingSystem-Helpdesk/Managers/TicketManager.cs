@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Confluent.Kafka;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,6 +21,8 @@ namespace TicketingSystem_Helpdesk.Managers
         private readonly ITicketRepository ticketRepository;
         private readonly IMessageManager messageManager;
         private readonly ITagManager tagManager;
+        private readonly IStatisticsManager statisticsManager;
+        private readonly ProducerConfig producerConfig;
 
         public TicketManager(UserManager<User> userManager,
             IServicesManager servicesManager,
@@ -26,7 +30,9 @@ namespace TicketingSystem_Helpdesk.Managers
             IStatusManager statusManager,
             ITicketRepository ticketRepository,
             IMessageManager messageManager,
-            ITagManager tagManager)
+            ITagManager tagManager,
+            IStatisticsManager statisticsManager,
+            ProducerConfig producerConfig)
         {
             this.userManager = userManager;
             this.servicesManager = servicesManager;
@@ -35,6 +41,8 @@ namespace TicketingSystem_Helpdesk.Managers
             this.ticketRepository = ticketRepository;
             this.messageManager = messageManager;
             this.tagManager = tagManager;
+            this.statisticsManager = statisticsManager;
+            this.producerConfig = producerConfig;
         }
 
         public async Task<Ticket> CreateObjectTicket(CreateTicketModel createTicketModel)
@@ -83,7 +91,31 @@ namespace TicketingSystem_Helpdesk.Managers
                 }   
             }
 
-            return true;
+
+            var openClosed = await this.statisticsManager.NumberOfTicketsOpenClosed();
+            _ =  await this.ProduceMessageForKafkaBroker(openClosed, "openClosed");
+
+            var messageModelForKafka = new
+            {
+                CreatorEmail = createTicketModel.TicketModel.TicketCreatorEmail,
+                ArrivalEmail = createTicketModel.TicketModel.ArrivalEmail
+            };
+            _ = await ProduceMessageForKafkaBroker(messageModelForKafka, "newMessage");
+
+                return true;
+        }
+
+        //Producer for kafka broker
+        public async Task<Boolean> ProduceMessageForKafkaBroker(object obj, string topic) {
+            //var openClosed = await this.statisticsManager.NumberOfTicketsOpenClosed();
+            string serializedJson = JsonConvert.SerializeObject(obj);
+
+            using (var producerForKafkaBroker = new ProducerBuilder<Null, string>(producerConfig).Build())
+            {
+                await producerForKafkaBroker.ProduceAsync(topic, new Message<Null, string> { Value = serializedJson });
+                producerForKafkaBroker.Flush(TimeSpan.FromSeconds(20));
+                return true;
+            }
         }
 
         public async Task<List<ReceiveTicketModel>> GetAllTicketsByPriority(string priority, string email, bool direction)
@@ -176,6 +208,9 @@ namespace TicketingSystem_Helpdesk.Managers
 
             await ticketRepository.DeleteTicket(ticket);
 
+            var openClosed = await this.statisticsManager.NumberOfTicketsOpenClosed();
+            _ = await this.ProduceMessageForKafkaBroker(openClosed, "openClosed");
+
             return true;
         }
 
@@ -193,6 +228,9 @@ namespace TicketingSystem_Helpdesk.Managers
             ticket.StatusId = idStatus;
 
             await ticketRepository.SaveChanges();
+
+            var openClosed = await this.statisticsManager.NumberOfTicketsOpenClosed();
+            _ = await this.ProduceMessageForKafkaBroker(openClosed, "openClosed");
 
             return true;
 

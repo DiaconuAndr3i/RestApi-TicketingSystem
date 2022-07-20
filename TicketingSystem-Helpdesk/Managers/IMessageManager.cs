@@ -15,5 +15,6 @@ namespace TicketingSystem_Helpdesk.Managers
         Task<Message> GetMessageById(string idMessage);
         Task<bool> DeleteMessage(string idMessage);
         Task<bool> UpdateMessage(string idMessage, MessageModel messageModel);
+        Task<Boolean> ProduceMessageForKafkaBroker(object obj, string topic);
     }
 }
